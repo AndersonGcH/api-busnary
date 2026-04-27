@@ -91,11 +91,11 @@ app.get('/conductores', (req, res) => {
 });
 
 app.post('/conductores', (req, res) => {
-    const { nombre, dni, telefono, licencia, tipo_licencia } = req.body;
+    const { nombre, dni, telefono, licencia, tipoLicencia } = req.body;
 
     db.query(
-        "INSERT INTO conductores (nombre, dni, telefono, licencia, tipo_licencia) VALUES (?, ?, ?, ?, ?)",
-        [nombre, dni, telefono, licencia, tipo_licencia],
+        "INSERT INTO conductores (nombre, dni, telefono, licencia, tipoLicencia) VALUES (?, ?, ?, ?, ?)",
+        [nombre, dni, telefono, licencia, tipoLicencia],
         (err, result) => {
             if (err) return res.json(err);
             res.json({ message: "Conductor creado" });
@@ -104,11 +104,11 @@ app.post('/conductores', (req, res) => {
 });
 
 app.put('/conductores/:id', (req, res) => {
-    const { nombre, dni, telefono, licencia, tipo_licencia } = req.body;
+    const { nombre, dni, telefono, licencia, tipoLicencia } = req.body;
 
     db.query(
-        "UPDATE conductores SET nombre=?, dni=?, telefono=?, licencia=?, tipo_licencia=? WHERE id=?",
-        [nombre, dni, telefono, licencia, tipo_licencia, req.params.id],
+        "UPDATE conductores SET nombre=?, dni=?, telefono=?, licencia=?, tipoLicencia=? WHERE id=?",
+        [nombre, dni, telefono, licencia, tipoLicencia, req.params.id],
         (err, result) => {
             if (err) return res.json(err);
             res.json({ message: "Conductor actualizado" });
@@ -123,6 +123,21 @@ app.delete('/conductores/:id', (req, res) => {
     });
 });
 
+app.get('/conductores/:id', (req, res) => {
+    db.query(
+        "SELECT * FROM conductores WHERE id = ?",
+        [req.params.id],
+        (err, result) => {
+            if (err) return res.json(err);
+
+            if (result.length === 0) {
+                return res.status(404).json({ message: "Conductor no encontrado" });
+            }
+
+            res.json(result[0]);
+        }
+    );
+});
 
 /* =========================
    🏢 SUCURSALES (CRUD)
@@ -167,6 +182,8 @@ app.delete('/sucursales/:id', (req, res) => {
         res.json({ message: "Sucursal eliminada" });
     });
 });
+
+
 
 
 /* =========================
