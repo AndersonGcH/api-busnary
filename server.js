@@ -62,6 +62,22 @@ app.delete('/buses/:id', (req, res) => {
     });
 });
 
+app.get('/buses/:id', (req, res) => {
+    db.query(
+        "SELECT * FROM buses WHERE id=?",
+        [req.params.id],
+        (err, result) => {
+            if (err) return res.json(err);
+
+            if (result.length === 0) {
+                return res.status(404).json({ message: "Bus no encontrado" });
+            }
+
+            res.json(result[0]);
+        }
+    );
+});
+
 
 /* =========================
    👨‍✈️ CONDUCTORES (CRUD)
