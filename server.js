@@ -271,11 +271,31 @@ app.get('/destinos/:id', (req, res) => {
 ========================= */
 
 app.get('/viajes', (req, res) => {
+
     const sql = `
-    SELECT v.*, b.placa, c.nombre AS conductor
+    SELECT 
+        v.id,
+        v.precio,
+        v.tiempo_aproximado,
+        v.fecha,
+
+        b.id AS bus_id,
+        b.placa,
+
+        c.id AS conductor_id,
+        c.nombre AS conductor,
+
+        s.id AS origen_id,
+        s.nombre AS origen,
+
+        d.id AS destino_id,
+        d.nombre AS destino
+
     FROM viajes v
     JOIN buses b ON v.bus_id = b.id
     JOIN conductores c ON v.conductor_id = c.id
+    JOIN sucursales s ON v.origen_id = s.id
+    JOIN destinos d ON v.destino_id = d.id
     `;
 
     db.query(sql, (err, result) => {
@@ -283,6 +303,107 @@ app.get('/viajes', (req, res) => {
         res.json(result);
     });
 });
+
+app.get('/viajes/:id', (req, res) => {
+
+    const sql = `
+    SELECT * FROM viajes WHERE id = ?
+    `;
+
+    db.query(sql, [req.params.id], (err, result) => {
+
+        if (err) return res.json(err);
+
+        if (result.length === 0) {
+            return res.status(404).json({ message: "Viaje no encontrado" });
+        }
+
+        res.json(result[0]);
+    });
+});
+
+app.post('/viajes', (req, res) => {
+
+    const {
+        bus_id,
+        conductor_id,
+        origen_id,
+        destino_id,
+        precio,
+        tiempo_aproximado,
+        fecha
+    } = req.body;
+
+    const sql = `
+    INSERT INTO viajes 
+    (bus_id, conductor_id, origen_id, destino_id, precio, tiempo_aproximado, fecha)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+    `;
+
+    db.query(sql,
+        [bus_id, conductor_id, origen_id, destino_id, precio, tiempo_aproximado, fecha],
+        (err, result) => {
+
+            if (err) return res.json(err);
+
+            res.json({
+                message: "Viaje creado",
+                id: result.insertId
+            });
+        }
+    );
+});
+
+app.put('/viajes/:id', (req, res) => {
+
+    const {
+        bus_id,
+        conductor_id,
+        origen_id,
+        destino_id,
+        precio,
+        tiempo_aproximado,
+        fecha
+    } = req.body;
+
+    const sql = `
+    UPDATE viajes SET
+        bus_id=?,
+        conductor_id=?,
+        origen_id=?,
+        destino_id=?,
+        precio=?,
+        tiempo_aproximado=?,
+        fecha=?
+    WHERE id=?
+    `;
+
+    db.query(sql,
+        [bus_id, conductor_id, origen_id, destino_id, precio, tiempo_aproximado, fecha, req.params.id],
+        (err, result) => {
+
+            if (err) return res.json(err);
+
+            res.json({ message: "Viaje actualizado" });
+        }
+    );
+});
+
+app.delete('/viajes/:id', (req, res) => {
+
+    db.query(
+        "DELETE FROM viajes WHERE id=?",
+        [req.params.id],
+        (err, result) => {
+
+            if (err) return res.json(err);
+
+            res.json({ message: "Viaje eliminado" });
+        }
+    );
+});
+
+
 
 
 /* =========================
