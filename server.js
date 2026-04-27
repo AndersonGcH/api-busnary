@@ -150,12 +150,28 @@ app.get('/sucursales', (req, res) => {
     });
 });
 
+app.get('/sucursales/:id', (req, res) => {
+    db.query(
+        "SELECT * FROM sucursales WHERE id = ?",
+        [req.params.id],
+        (err, result) => {
+            if (err) return res.json(err);
+
+            if (result.length === 0) {
+                return res.status(404).json({ message: "Sucursal no encontrada" });
+            }
+
+            res.json(result[0]);
+        }
+    );
+});
+
 app.post('/sucursales', (req, res) => {
-    const { id, codigo, nombre, direccion } = req.body;
+    const { codigo, nombre, direccion } = req.body;
 
     db.query(
-        "INSERT INTO sucursales (id, codigo, nombre, direccion) VALUES (?, ?, ?, ?)",
-        [id, codigo, nombre, direccion],
+        "INSERT INTO sucursales (codigo, nombre, direccion) VALUES (?, ?, ?)",
+        [codigo, nombre, direccion],
         (err, result) => {
             if (err) return res.json(err);
             res.json({ message: "Sucursal creada" });
@@ -177,14 +193,15 @@ app.put('/sucursales/:id', (req, res) => {
 });
 
 app.delete('/sucursales/:id', (req, res) => {
-    db.query("DELETE FROM sucursales WHERE id=?", [req.params.id], (err, result) => {
-        if (err) return res.json(err);
-        res.json({ message: "Sucursal eliminada" });
-    });
+    db.query(
+        "DELETE FROM sucursales WHERE id=?",
+        [req.params.id],
+        (err, result) => {
+            if (err) return res.json(err);
+            res.json({ message: "Sucursal eliminada" });
+        }
+    );
 });
-
-
-
 
 /* =========================
    📍 DESTINOS (CRUD)
