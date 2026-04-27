@@ -247,6 +247,24 @@ app.delete('/destinos/:id', (req, res) => {
     });
 });
 
+app.get('/destinos/:id', (req, res) => {
+
+    db.query(
+        "SELECT * FROM destinos WHERE id = ?",
+        [req.params.id],
+        (err, result) => {
+
+            if (err) return res.json(err);
+
+            if (result.length === 0) {
+                return res.status(404).json({ message: "Destino no encontrado" });
+            }
+
+            res.json(result[0]);
+        }
+    );
+});
+
 
 /* =========================
    🚍 VIAJES
