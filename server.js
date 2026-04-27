@@ -406,6 +406,7 @@ app.delete('/viajes/:id', (req, res) => {
 
 
 
+
 /* =========================
    🪑 RESERVAS
 ========================= */
@@ -436,6 +437,50 @@ app.post('/reservas', (req, res) => {
     );
 });
 
+app.get('/reservas', (req, res) => {
+    db.query("SELECT * FROM reservas", (err, result) => {
+        if (err) return res.json(err);
+        res.json(result);
+    });
+});
+
+app.get('/reservas/buscar/:id', (req, res) => {
+    db.query(
+        "SELECT * FROM reservas WHERE id=?",
+        [req.params.id],
+        (err, result) => {
+            if (err) return res.json(err);
+            res.json(result[0]);
+        }
+    );
+});
+
+app.put('/reservas/:id', (req, res) => {
+
+    const { asiento, estado } = req.body;
+
+    db.query(
+        "UPDATE reservas SET asiento=?, estado=? WHERE id=?",
+        [asiento, estado, req.params.id],
+        (err, result) => {
+            if (err) return res.json(err);
+            res.json({ message: "Reserva actualizada" });
+        }
+    );
+});
+
+
+app.delete('/reservas/:id', (req, res) => {
+
+    db.query(
+        "DELETE FROM reservas WHERE id=?",
+        [req.params.id],
+        (err, result) => {
+            if (err) return res.json(err);
+            res.json({ message: "Reserva eliminada" });
+        }
+    );
+});
 
 /* =========================
    🚀 SERVER
