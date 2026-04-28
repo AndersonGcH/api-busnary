@@ -423,16 +423,37 @@ app.get('/reservas/:viaje_id', (req, res) => {
 });
 
 app.post('/reservas', (req, res) => {
-    const { viaje_id, asiento, nombre_cliente, dni_cliente } = req.body;
+
+    const { viaje_id, asientos, nombre_cliente, dni_cliente } = req.body;
+
+    if (!Array.isArray(asientos) || asientos.length === 0) {
+        return res.json({ message: "No hay asientos seleccionados ❌" });
+    }
+
+    const values = asientos.map(asiento => [
+        viaje_id,
+        asiento,
+        nombre_cliente,
+        dni_cliente,
+        'confirmado',
+        new Date()
+    ]);
 
     db.query(
         `INSERT INTO reservas 
         (viaje_id, asiento, nombre_cliente, dni_cliente, estado, fecha_reserva)
-        VALUES (?, ?, ?, ?, 'confirmado', NOW())`,
-        [viaje_id, asiento, nombre_cliente, dni_cliente],
+        VALUES ?`,
+        [values],
         (err, result) => {
-            if (err) return res.json(err);
-            res.json({ message: "Reserva creada" });
+
+            if (err) {
+                if (err.code === 'ER_DUP_ENTRY') {
+                    return res.json({ message: "Uno o más asientos ya están ocupados ❌" });
+                }
+                return res.json(err);
+            }
+
+            res.json({ message: "Reserva múltiple creada ✅" });
         }
     );
 });
